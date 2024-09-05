@@ -1,0 +1,22 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.arhohuttunen'
+version = '0.0.1-SNAPSHOT'
+
+compileJava {
+    sourceCompatibility = '17'
+}
+
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+
+    tasks.withType(Test.class).tap {
+        configureEach {
+            useJUnitPlatform()
+        }
+    }
+}
