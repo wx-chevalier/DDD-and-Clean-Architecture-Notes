@@ -1,0 +1,161 @@
+openapi: 3.0.2
+info:
+  title: Course Enrollments
+  description: "Course Enrollments API"
+  contact:
+    email: anton93lev@gmail.com
+  version: 0.0.1-SNAPSHOT
+tags:
+  - name: Course Enrollments
+    description: Course Enrollments API
+paths:
+  /courses/{uuid}/course-enrollments:
+    post:
+      tags:
+        - Course Enrollments
+      summary: Enroll to course
+      description: Enroll to course
+      operationId: enrollToCourse
+      parameters:
+        - name: uuid
+          in: path
+          description: Course UUID
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: 123e4567-e89b-12d3-a456-426655440001
+      requestBody:
+        description: Student username. It's temp solution before implementing user module.
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/CourseEnrollmentRequest'
+        required: true
+      responses:
+        '201':
+          description: Enrolled to course.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseEnrollment'
+        '404':
+          description: Course not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestApiErrorResponse'
+        '500':
+          description: Unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestApiErrorResponse'
+  /course-enrollments:
+    get:
+      tags:
+        - Course Enrollments
+      summary: List Course Enrollments
+      description: List Course Enrollments
+      operationId: courseEnrollments
+      responses:
+        '200':
+          description: List of course enrollments returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseEnrollmentDTO'
+        '500':
+          description: Unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestApiErrorResponse'
+components:
+  schemas:
+    CourseEnrollmentRequest:
+      description: Course enrollment request
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          description: Student username.
+          example: 123e4567-e89b-12d3-a456-426655440001
+    CourseEnrollment:
+      description: Course enrollment
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          description: Course Enrollment UUID.
+          example: 123e4567-e89b-12d3-a456-426655440001
+    CourseEnrollmentDTO:
+      description: Course enrollment
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          description: Course enrollment UUID.
+          example: 123e4567-e89b-12d3-a456-426655440001
+        course:
+          type: string
+          format: uuid
+          description: Course UUID.
+          example: 123e4567-e89b-12d3-a456-426655440001
+        student:
+          type: string
+          description: Student name.
+          example: name
+        completionStatus:
+          type: string
+          description: Completion status.
+          example: IN_PROGRESS
+          enum: [IN_PROGRESS, COMPLETED]
+    RestApiError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: ErrorCode
+          description: Error code.
+        details:
+          type: array
+          description: An array of details about specific errors that led to this reported error.
+          items:
+            $ref: '#/components/schemas/RestApiError'
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+        message:
+          type: string
+          example: Validation issues
+          description: A human-readable representation of the error.
+        target:
+          type: string
+          example: field
+          description: The target of the error.
+      title: RestApiError
+      description: REST API Error.
+    RestApiErrorResponse:
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/RestApiError'
+      title: RestApiErrorResponse
+      description: REST API Error Response. Full description about error response is represented in https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses
+    InnerError:
+      type: object
+      properties:
+        code:
+          type: string
+          example: ErrorCode
+          description: Error code.
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+      title: InnerError
+      description: An object containing more specific information than the current object about the error.

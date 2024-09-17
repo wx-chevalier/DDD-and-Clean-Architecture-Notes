@@ -1,0 +1,167 @@
+openapi: 3.0.2
+info:
+  title: Administration Course Proposals API
+  description: "Administration Course Proposals API"
+  contact:
+    email: anton93lev@gmail.com
+  version: 0.0.1-SNAPSHOT
+tags:
+  - name: Administration Course Proposals API
+    description: Administration Course Proposals API
+paths:
+  '/administration/course-proposals/{uuid}/approval-status':
+    put:
+      tags:
+        - Administration Course Proposals API
+      summary: Approve Course Proposal
+      description: Approve Course Proposal
+      operationId: approveCourseProposal
+      parameters:
+        - name: uuid
+          in: path
+          description: Course Proposal UUID.
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: 123e4567-e89b-12d3-a456-426655440001
+      responses:
+        '204':
+          description: Course Proposal approved.
+        '400':
+          description: Course Proposal was already approved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestApiErrorResponse'
+        '404':
+          description: Course Proposal not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestApiErrorResponse'
+        '500':
+          description: Unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestApiErrorResponse'
+    delete:
+      tags:
+        - Administration Course Proposals API
+      summary: Decline Course Proposal
+      description: Decline Course Proposal
+      operationId: declineCourseProposal
+      parameters:
+        - name: uuid
+          in: path
+          description: Course Proposal UUID.
+          required: true
+          schema:
+            type: string
+            format: uuid
+          x-example: 123e4567-e89b-12d3-a456-426655440001
+      responses:
+        '204':
+          description: Course Proposal declined.
+        '400':
+          description: Course Proposal was already approved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestApiErrorResponse'
+        '404':
+          description: Course Proposal not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestApiErrorResponse'
+        '500':
+          description: Unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestApiErrorResponse'
+  '/administration/course-proposals':
+    get:
+      tags:
+        - Administration Course Proposals API
+      summary: List course proposals
+      description: List course proposals
+      operationId: listCourseProposals
+      responses:
+        '200':
+          description: Course Proposals returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListCourseProposalsResponse'
+        '500':
+          description: Unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestApiErrorResponse'
+components:
+  schemas:
+    ListCourseProposalsResponse:
+      description: List of Course Proposals response model
+      type: array
+      items:
+        type: object
+        properties:
+          uuid:
+            type: string
+            description: Course UUID
+            format: uuid
+            example: 123e4567-e89b-12d3-a456-426655440001
+          status:
+            type: string
+            description: status
+            example: APPROVED
+            enum: [WAITING_FOR_APPROVAL, DECLINED, APPROVED]
+    RestApiError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: ErrorCode
+          description: Error code.
+        details:
+          type: array
+          description: An array of details about specific errors that led to this reported error.
+          items:
+            $ref: '#/components/schemas/RestApiError'
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+        message:
+          type: string
+          example: Validation issues
+          description: A human-readable representation of the error.
+        target:
+          type: string
+          example: field
+          description: The target of the error.
+      title: RestApiError
+      description: REST API Error.
+    RestApiErrorResponse:
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/RestApiError'
+      title: RestApiErrorResponse
+      description: REST API Error Response. Full description about error response is represented in https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses
+    InnerError:
+      type: object
+      properties:
+        code:
+          type: string
+          example: ErrorCode
+          description: Error code.
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+      title: InnerError
+      description: An object containing more specific information than the current object about the error.

@@ -1,0 +1,259 @@
+openapi: 3.0.2
+info:
+  title: Course Reviews
+  description: "Course Reviews API"
+  contact:
+    email: anton93lev@gmail.com
+  version: 0.0.1-SNAPSHOT
+tags:
+  - name: Course Reviews
+    description: Course Reviews API
+paths:
+  /courses/{uuid}/reviews:
+    post:
+      tags:
+        - Course Reviews
+      summary: Add course review to course
+      description: Add course review to course
+      operationId: courseReview
+      parameters:
+        - name: uuid
+          in: path
+          description: Course UUID
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: 123e4567-e89b-12d3-a456-426655440001
+      requestBody:
+        description: Add Course review request
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/ReviewCourseRequest'
+        required: true
+      responses:
+        '201':
+          description: New Course Review added.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseReviewCreatedResponse'
+        '400':
+          description: Validation issues in payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestApiErrorResponse'
+        '500':
+          description: Unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestApiErrorResponse'
+    get:
+      tags:
+        - Course Reviews
+      summary: List course reviews
+      description: List course reviews
+      operationId: listCourseReviews
+      parameters:
+        - name: uuid
+          in: path
+          description: Course UUID
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: 123e4567-e89b-12d3-a456-426655440001
+      responses:
+        '200':
+          description: Course Reviews returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListCourseReviewsResponse'
+        '404':
+          description: Course with provided identifier not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestApiErrorResponse'
+        '500':
+          description: Unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestApiErrorResponse'
+
+  /courses/{courseUuid}/reviews/{reviewUuid}:
+    put:
+      tags:
+        - Course Reviews
+      summary: Edit course review
+      description: Edit course review
+      operationId: courseReview
+      parameters:
+        - name: courseUuid
+          in: path
+          description: Course UUID
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: 123e4567-e89b-12d3-a456-426655440001
+        - name: reviewUuid
+          in: path
+          description: Review UUID
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: 123e4567-e89b-12d3-a456-426655440001
+      requestBody:
+        description: Add Course review request
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/UpdateCourseReviewRequest'
+        required: true
+      responses:
+        '204':
+          description: Course Review updated.
+        '400':
+          description: Validation issues in payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestApiErrorResponse'
+        '404':
+          description: Course Review not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestApiErrorResponse'
+        '500':
+          description: Unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestApiErrorResponse'
+components:
+  schemas:
+    ReviewCourseRequest:
+      description: Review Course model
+      type: object
+      required:
+        - reviewer
+        - rating
+      properties:
+        reviewer:
+          type: string
+          description: Reviewer username
+          example: username
+        rating:
+          type: double
+          description: Rating
+          example: 3.0
+        comment:
+          type: string
+          description: Comment
+          example: Good course, very useful!
+    UpdateCourseReviewRequest:
+      description: Update Course Review model
+      type: object
+      required:
+        - rating
+      properties:
+        rating:
+          type: double
+          description: Rating
+          example: 3.0
+        comment:
+          type: string
+          description: Comment
+          example: Good course, very useful!
+    CourseReviewCreatedResponse:
+      description: Course review created response model
+      type: object
+      required:
+        - uuid
+      properties:
+        uuid:
+          type: string
+          description: Course Review UUID
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426655440001
+    ListCourseReviewsResponse:
+      description: List of Course Reviews response model
+      type: array
+      items:
+        type: object
+        properties:
+          uuid:
+            type: string
+            description: Course Review UUID
+            format: uuid
+            example: 123e4567-e89b-12d3-a456-426655440001
+          course:
+            type: string
+            description: Course UUID
+            format: uuid
+            example: 123e4567-e89b-12d3-a456-426655440002
+          username:
+            type: string
+            description: username
+            example: user
+          comment:
+            type: string
+            description: comment
+            example: comment
+          rating:
+            type: double
+            description: rating
+            example: 4.2
+    RestApiError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: ErrorCode
+          description: Error code.
+        details:
+          type: array
+          description: An array of details about specific errors that led to this reported error.
+          items:
+            $ref: '#/components/schemas/RestApiError'
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+        message:
+          type: string
+          example: Validation issues
+          description: A human-readable representation of the error.
+        target:
+          type: string
+          example: field
+          description: The target of the error.
+      title: RestApiError
+      description: REST API Error.
+    RestApiErrorResponse:
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/RestApiError'
+      title: RestApiErrorResponse
+      description: REST API Error Response. Full description about error response is represented in https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses
+    InnerError:
+      type: object
+      properties:
+        code:
+          type: string
+          example: ErrorCode
+          description: Error code.
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+      title: InnerError
+      description: An object containing more specific information than the current object about the error.

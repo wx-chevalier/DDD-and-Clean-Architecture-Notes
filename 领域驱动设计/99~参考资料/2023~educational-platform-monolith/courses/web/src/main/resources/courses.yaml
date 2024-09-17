@@ -1,0 +1,157 @@
+openapi: 3.0.2
+info:
+  title: Courses
+  description: "Courses API"
+  contact:
+    email: anton93lev@gmail.com
+  version: 0.0.1-SNAPSHOT
+tags:
+  - name: Courses
+    description: Courses API
+paths:
+  /courses:
+    post:
+      tags:
+        - Courses
+      summary: Create course
+      description: Create course functionality
+      operationId: createCourse
+      requestBody:
+        description: Course creation request
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/CreateCourseRequest'
+        required: true
+      responses:
+        '201':
+          description: New Course created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatedCourseResponse'
+        '400':
+          description: Validation issues in payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestApiErrorResponse'
+        '500':
+          description: Unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestApiErrorResponse'
+  /courses/{courseUuid}/publish-status:
+    put:
+      tags:
+        - Course Publish status
+      summary: Publish Course
+      description: Publish Course
+      operationId: publishCourse
+      parameters:
+        - name: courseUuid
+          in: path
+          description: Course UUID
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: 123e4567-e89b-12d3-a456-426655440001
+      responses:
+        '204':
+          description: Course published.
+        '404':
+          description: Course not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestApiErrorResponse'
+        '409':
+          description: Course not approved, course should be approved before publishing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestApiErrorResponse'
+        '500':
+          description: Unexpected server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestApiErrorResponse'
+
+components:
+  schemas:
+    CreateCourseRequest:
+      description: Course creation model
+      type: object
+      required:
+        - name
+        - description
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Course name
+          example: Java 11 for beginners
+        description:
+          type: string
+          minLength: 1
+          description: Course description
+          example: Course created for Java developers
+    CreatedCourseResponse:
+      description: Course model
+      type: object
+      required:
+        - uuid
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426655440001
+          description: UUID of the company.
+    RestApiError:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: ErrorCode
+          description: Error code.
+        details:
+          type: array
+          description: An array of details about specific errors that led to this reported error.
+          items:
+            $ref: '#/components/schemas/RestApiError'
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+        message:
+          type: string
+          example: Validation issues
+          description: A human-readable representation of the error.
+        target:
+          type: string
+          example: field
+          description: The target of the error.
+      title: RestApiError
+      description: REST API Error.
+    RestApiErrorResponse:
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/RestApiError'
+      title: RestApiErrorResponse
+      description: REST API Error Response. Full description about error response is represented in https://github.com/microsoft/api-guidelines/blob/vNext/Guidelines.md#7102-error-condition-responses
+    InnerError:
+      type: object
+      properties:
+        code:
+          type: string
+          example: ErrorCode
+          description: Error code.
+        innererror:
+          $ref: '#/components/schemas/InnerError'
+      title: InnerError
+      description: An object containing more specific information than the current object about the error.
